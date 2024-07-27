@@ -1,11 +1,31 @@
 services:
+
+  mysql:
+    image: mysql:8.0
+    volumes:
+      - mysql_data:/var/lib/mysql
+    env_file:
+      - .env.dev
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
     
   express:
     build: .
     ports:
       - "3000:3000"
+    depends_on:
+      mysql:
+        condition: service_healthy
     env_file:
       - .env.dev
     volumes:
       - .:/task-manager
     restart: always
+
+volumes:
+  mysql_data:
